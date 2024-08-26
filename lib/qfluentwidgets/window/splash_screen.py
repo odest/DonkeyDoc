@@ -10,7 +10,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsDropShadowEffect
 from ..common.icon import FluentIconBase, drawIcon, toQIcon
 from ..common.style_sheet import isDarkTheme, FluentStyleSheet
 from ..components.widgets import IconWidget
-from qframelesswindow import TitleBar
+#The usage of 'lib.' was employed while importing because it has been moved to the 'lib' directory.
+#The standard usage was 'qframelesswindow import TitleBar'
+from lib.qframelesswindow import TitleBar
 
 
 

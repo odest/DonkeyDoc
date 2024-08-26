@@ -2,7 +2,9 @@
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QEvent
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QPushButton
-from qframelesswindow import FramelessDialog
+#The usage of 'lib.' was employed while importing because it has been moved to the 'lib' directory.
+#The standard usage was 'qframelesswindow import FramelessDialog'
+from lib.qframelesswindow import FramelessDialog
 
 from ...common.auto_wrap import TextWrap
 from ...common.style_sheet import FluentStyleSheet

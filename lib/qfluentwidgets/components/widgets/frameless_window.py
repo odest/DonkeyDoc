@@ -1,7 +1,9 @@
 import sys
 
 if sys.platform != "win32" or sys.getwindowsversion().build < 22000:
-    from qframelesswindow import FramelessWindow
+    #The usage of 'lib.' was employed while importing because it has been moved to the 'lib' directory.
+    #The standard usage was 'qframelesswindow import FramelessWindow'
+    from lib.qframelesswindow import FramelessWindow
 else:
     from ctypes.wintypes import MSG
 
@@ -10,8 +12,12 @@ else:
     from PyQt5.QtGui import QCursor, QMouseEvent
     from PyQt5.QtWidgets import QApplication
 
-    from qframelesswindow import AcrylicWindow as Window
-    from qframelesswindow.titlebar.title_bar_buttons import TitleBarButtonState
+    #The usage of 'lib.' was employed while importing because it has been moved to the 'lib' directory.
+    #The standard usage was 'qframelesswindow import AcrylicWindow as Window'
+    from lib.qframelesswindow import AcrylicWindow as Window
+    #The usage of 'lib.' was employed while importing because it has been moved to the 'lib' directory.
+    #The standard usage was 'qframelesswindow.titlebar.title_bar_buttons import TitleBarButtonState'
+    from lib.qframelesswindow.titlebar.title_bar_buttons import TitleBarButtonState
 
 
     class FramelessWindow(Window):

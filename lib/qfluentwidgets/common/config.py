@@ -12,7 +12,8 @@ from PyQt5.QtGui import QColor
 from .exception_handler import exceptionHandler
 
 
-ALERT = "\n\033[1;33m📢 Tips:\033[0m QFluentWidgets Pro is now released. Click \033[1;96mhttps://qfluentwidgets.com/pages/pro\033[0m to learn more about it.\n"
+#This feature has been disabled because it is not used.
+# ALERT = "\n\033[1;33m📢 Tips:\033[0m QFluentWidgets Pro is now released. Click \033[1;96mhttps://qfluentwidgets.com/pages/pro\033[0m to learn more about it.\n"
 
 
 class Theme(Enum):
@@ -405,9 +406,11 @@ class QConfig(QObject):
 
 qconfig = QConfig()
 try:
-    print(ALERT)
+    pass
+    # print(ALERT) #This feature has been disabled because it is not used.
 except UnicodeEncodeError:
-    print(ALERT.replace("📢", ""))
+    pass
+    #print(ALERT.replace("📢", "")) #This feature has been disabled because it is not used.
 
 
 def isDarkTheme():

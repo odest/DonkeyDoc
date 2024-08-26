@@ -2,7 +2,9 @@
 from enum import Enum
 from typing import List, Union
 
-from qframelesswindow import WindowEffect
+#The usage of 'lib.' was employed while importing because it has been moved to the 'lib' directory.
+#The standard usage was 'qframelesswindow import WindowEffect'
+from lib.qframelesswindow import WindowEffect
 from PyQt5.QtCore import (QEasingCurve, QEvent, QPropertyAnimation, QObject, QModelIndex,
                           Qt, QSize, QRectF, pyqtSignal, QPoint, QTimer, QParallelAnimationGroup)
 from PyQt5.QtGui import (QIcon, QColor, QPainter, QPen, QPixmap, QRegion, QCursor, QTextCursor, QHoverEvent,
