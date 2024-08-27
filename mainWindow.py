@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QApplication
 
 from lib import FluentWindow, SplashScreen
+from app.common.config import cfg
 
 
 class MainWindow(FluentWindow):
@@ -15,10 +16,10 @@ class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
 
-        self.initWindow()
-        self.splashScreen.finish()
+        self.init_window()
+        self.splash_screen.finish()
 
-    def initWindow(self):
+    def init_window(self):
         """Initialize the main window properties and display the splash screen."""
         self.resize(970, 790)
         self.setMinimumWidth(760)
@@ -26,9 +27,9 @@ class MainWindow(FluentWindow):
         self.setWindowTitle("DonkeyDoc")
 
         # create splash screen
-        self.splashScreen = SplashScreen(self.windowIcon(), self)
-        self.splashScreen.setIconSize(QSize(106, 106))
-        self.splashScreen.raise_()
+        self.splash_screen = SplashScreen(self.windowIcon(), self)
+        self.splash_screen.setIconSize(QSize(106, 106))
+        self.splash_screen.raise_()
 
         desktop = QApplication.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
@@ -41,11 +42,21 @@ class MainWindow(FluentWindow):
     def resizeEvent(self, e):
         """Handle the resize event"""
         super().resizeEvent(e)
-        if hasattr(self, "splashScreen"):
-            self.splashScreen.resize(self.size())
+        if hasattr(self, "splash_screen"):
+            self.splash_screen.resize(self.size())
 
 
 if __name__ == "__main__":
+    # enable dpi scale
+    if cfg.get(cfg.dpiScale) == "Auto":
+        QApplication.setHighDpiScaleFactorRoundingPolicy(
+            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+        )
+        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    else:
+        os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
+        os.environ["QT_SCALE_FACTOR"] = str(cfg.get(cfg.dpiScale))
+
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
     # create application
