@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import QApplication
 from lib import FluentWindow, SplashScreen, FluentIcon, NavigationItemPosition
 from .home_interface import HomeInterface
 from .setting_interface import SettingInterface
+from ..common.signal_bus import signalBus
+from ..common.config import cfg
 from ..common import resource
 
 
@@ -20,6 +22,7 @@ class MainWindow(FluentWindow):
         self.init_window()
         self.init_interface()
         self.init_navigation()
+        self.connect_signal_to_slot()
         self.splash_screen.finish()
 
     def init_interface(self):
@@ -44,6 +47,8 @@ class MainWindow(FluentWindow):
         self.setWindowIcon(QIcon(os.path.join("docs", "logo.svg")))
         self.setWindowTitle("DonkeyDoc")
 
+        self.setMicaEffectEnabled(cfg.get(cfg.micaEnabled))
+
         # create splash screen
         self.splash_screen = SplashScreen(self.windowIcon(), self)
         self.splash_screen.setIconSize(QSize(106, 106))
@@ -62,3 +67,7 @@ class MainWindow(FluentWindow):
         super().resizeEvent(e)
         if hasattr(self, "splash_screen"):
             self.splash_screen.resize(self.size())
+
+    def connect_signal_to_slot(self):
+        """connect signal to slot"""
+        signalBus.micaEnableChanged.connect(self.setMicaEffectEnabled)
