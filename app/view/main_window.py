@@ -1,13 +1,12 @@
 # coding: utf-8
 import os
-import sys
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QApplication
 
-from lib import FluentWindow, SplashScreen
-from app.common.config import cfg
+from lib import FluentWindow, SplashScreen, FluentIcon
+from app.view.home_interface import HomeInterface
 
 
 class MainWindow(FluentWindow):
@@ -17,7 +16,17 @@ class MainWindow(FluentWindow):
         super().__init__()
 
         self.init_window()
+        self.init_interface()
+        self.init_navigation()
         self.splash_screen.finish()
+
+    def init_interface(self):
+        """Initialize the interfaces"""
+        self.home_interface = HomeInterface(self)
+
+    def init_navigation(self):
+        """Add navigation items"""
+        self.addSubInterface(self.home_interface, FluentIcon.HOME, "Home")
 
     def init_window(self):
         """Initialize the main window properties and display the splash screen."""
@@ -44,27 +53,3 @@ class MainWindow(FluentWindow):
         super().resizeEvent(e)
         if hasattr(self, "splash_screen"):
             self.splash_screen.resize(self.size())
-
-
-if __name__ == "__main__":
-    # enable dpi scale
-    if cfg.get(cfg.dpiScale) == "Auto":
-        QApplication.setHighDpiScaleFactorRoundingPolicy(
-            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-        )
-        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    else:
-        os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
-        os.environ["QT_SCALE_FACTOR"] = str(cfg.get(cfg.dpiScale))
-
-    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
-
-    # create application
-    app = QApplication(sys.argv)
-    app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
-
-    # create main window
-    w = MainWindow()
-    w.show()
-
-    app.exec_()
