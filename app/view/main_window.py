@@ -5,8 +5,10 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QApplication
 
-from lib import FluentWindow, SplashScreen, FluentIcon
-from app.view.home_interface import HomeInterface
+from lib import FluentWindow, SplashScreen, FluentIcon, NavigationItemPosition
+from .home_interface import HomeInterface
+from .setting_interface import SettingInterface
+from ..common import resource
 
 
 class MainWindow(FluentWindow):
@@ -23,10 +25,17 @@ class MainWindow(FluentWindow):
     def init_interface(self):
         """Initialize the interfaces"""
         self.home_interface = HomeInterface(self)
+        self.settings_interface = SettingInterface(self)
 
     def init_navigation(self):
         """Add navigation items"""
         self.addSubInterface(self.home_interface, FluentIcon.HOME, "Home")
+        self.addSubInterface(
+            self.settings_interface,
+            FluentIcon.SETTING,
+            "Settings",
+            NavigationItemPosition.BOTTOM,
+        )
 
     def init_window(self):
         """Initialize the main window properties and display the splash screen."""

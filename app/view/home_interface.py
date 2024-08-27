@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
 from lib import DisplayLabel
 
+from ..common.style_sheet import StyleSheet
+
 
 class HomeInterface(QWidget):
     """Home interface"""
@@ -12,6 +14,8 @@ class HomeInterface(QWidget):
         super().__init__(parent=parent)
 
         self.setObjectName("home_interface")
+        # initialize style sheet
+        StyleSheet.HOME_INTERFACE.apply(self)
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignCenter)
