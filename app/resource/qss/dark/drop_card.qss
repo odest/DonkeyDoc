@@ -1,0 +1,13 @@
+#DropCard {
+    background: transparent;
+    border: 3px dashed --ThemeColorPrimary;
+    border-radius: 5px;
+}
+
+#DropCard QLabel#area_label {
+    font: 32px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
+    font-weight: bold;
+    background: transparent;
+    border-radius: 5px;
+    color: --ThemeColorPrimary;
+}

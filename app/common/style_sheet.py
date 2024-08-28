@@ -9,6 +9,7 @@ class StyleSheet(StyleSheetBase, Enum):
 
     HOME_INTERFACE = "home_interface"
     SETTING_INTERFACE = "setting_interface"
+    DROP_CARD = "drop_card"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme
