@@ -22,6 +22,7 @@ class DropCard(CardWidget):
     """DropCard"""
 
     tooltip_signal = pyqtSignal(str, str, str)
+    select_signal = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -55,7 +56,7 @@ class DropCard(CardWidget):
         self.or_label.setAlignment(Qt.AlignCenter)
 
         self.select_button = PrimaryPushButton(
-            FluentIcon.DICTIONARY_ADD, "Select File(s)", self
+            FluentIcon.FOLDER_ADD, "Select File(s)", self
         )
         self.select_button.clicked.connect(self.show_file_dialog)
 
@@ -79,13 +80,8 @@ class DropCard(CardWidget):
         file_paths, _ = QFileDialog.getOpenFileNames(self, "Select Files", "")
 
         if file_paths:
-            self.tooltip_signal.emit(
-                "success",
-                "Files added",
-                "Selected files have been added successfully",
-            )
-            for i in file_paths:
-                print(i)
+            for file_path in file_paths:
+                self.select_signal.emit(file_path)
 
     def paste_file(self):
         """retrieve files copied to clipboard"""
@@ -94,13 +90,8 @@ class DropCard(CardWidget):
             urls = mime_data.urls()
             file_paths = [url.toLocalFile() for url in urls]
             if file_paths:
-                self.tooltip_signal.emit(
-                    "success",
-                    "Files added",
-                    "Selected files have been added successfully",
-                )
                 for file_path in file_paths:
-                    print(file_path)
+                    self.select_signal.emit(file_path)
         else:
             self.tooltip_signal.emit(
                 "warning",
@@ -130,13 +121,8 @@ class DropCard(CardWidget):
             file_paths = [url.toLocalFile() for url in urls]
 
             if file_paths:
-                self.tooltip_signal.emit(
-                    "success",
-                    "Files added",
-                    "Selected files have been added successfully",
-                )
                 for file_path in file_paths:
-                    print(file_path)
+                    self.select_signal.emit(file_path)
                 event.accept()
 
         else:
