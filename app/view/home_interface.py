@@ -89,7 +89,7 @@ class HomeInterface(QWidget):
 
     def add_file(self, path):
         """add file"""
-        state, tooltip_type, title, content = validate_file(self, path)
+        doc, state, tooltip_type, title, content = validate_file(self, path)
         self.show_tooltip(tooltip_type, title, content)
 
         if not state:
@@ -109,7 +109,7 @@ class HomeInterface(QWidget):
             )
             return
 
-        view_area = ViewArea(file_name)
+        view_area = ViewArea(path, doc)
         self.add_sub_interface(view_area, file_name, file_name)
 
         self.show_drop_card = False
