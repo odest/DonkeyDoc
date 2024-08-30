@@ -1,5 +1,5 @@
 # coding:utf-8
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QStandardPaths
 from PyQt5.QtWidgets import (
     QLabel,
     QVBoxLayout,
@@ -77,7 +77,13 @@ class DropCard(CardWidget):
 
     def show_file_dialog(self):
         """show file dialog and get files"""
-        file_paths, _ = QFileDialog.getOpenFileNames(self, "Select Files", "")
+        file_filter = "Docs (*.pdf *.epub *.txt *.mobi *.xps *.fb2 *.cbz);;Images (*.png *.jpg *.jpeg *.bmp *.tiff *.svg)"
+        file_paths, _ = QFileDialog.getOpenFileNames(
+            self,
+            "Select Files",
+            QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation),
+            file_filter,
+        )
 
         if file_paths:
             for file_path in file_paths:

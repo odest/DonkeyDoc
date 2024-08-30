@@ -19,6 +19,7 @@ from ..common.style_sheet import StyleSheet
 from ..components.drop_card import DropCard
 from ..components.view_area import ViewArea
 from ..components.tabbar_card import TabBarCard
+from ..utils.file_validation import validate_file
 
 
 class HomeInterface(QWidget):
@@ -88,6 +89,12 @@ class HomeInterface(QWidget):
 
     def add_file(self, path):
         """add file"""
+        state, tooltip_type, title, content = validate_file(path)
+        self.show_tooltip(tooltip_type, title, content)
+
+        if not state:
+            return
+
         file_name = os.path.basename(path)
         if file_name in self.tab_bar.itemMap:
             self.tab_bar.setCurrentTab(file_name)
@@ -104,11 +111,6 @@ class HomeInterface(QWidget):
 
         view_area = ViewArea(file_name)
         self.add_sub_interface(view_area, file_name, file_name)
-        self.show_tooltip(
-            "success",
-            "File added",
-            f"{file_name} have been added successfully",
-        )
 
         self.show_drop_card = False
         self.show_tab_bar_card = True
@@ -182,6 +184,16 @@ class HomeInterface(QWidget):
             )
         elif tooltip_type == "warning":
             InfoBar.warning(
+                title=title,
+                content=content,
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP_RIGHT,
+                duration=1500,
+                parent=self,
+            )
+        elif tooltip_type == "error":
+            InfoBar.error(
                 title=title,
                 content=content,
                 orient=Qt.Horizontal,
