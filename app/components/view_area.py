@@ -7,23 +7,32 @@ from PyQt5.QtWidgets import QVBoxLayout, QWidget, QGraphicsDropShadowEffect
 from pymupdf.utils import get_pixmap
 from pymupdf import Identity
 
-from lib import CardWidget, ScrollArea, PixmapLabel
+from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme
+from ..components.tool_bar import ToolBar
 
 
 class ViewArea(CardWidget):
     """ViewArea"""
 
-    def __init__(self, path, doc, parent=None):
+    def __init__(self, doc, parent=None):
         super().__init__(parent)
 
-        self.path = path
         self.document = doc
         self.page_count = doc.page_count
+        self.current_page = 1
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignCenter)
         self.main_layout.setContentsMargins(10, 10, 10, 10)
         self.main_layout.setSpacing(12)
+
+        self.tool_bar = ToolBar()
+        self.tool_bar.page_count_line_edit.setText(str(self.current_page))
+        self.tool_bar.page_count_label.setText(
+            f"/ {self.page_count}",
+        )
+        self.tool_bar.theme_button.clicked.connect(lambda: toggleTheme(True))
+        self.main_layout.addWidget(self.tool_bar)
 
         self.vertical_scroll_area = ScrollArea(self)
         self.vertical_scroll_area.setStyleSheet(

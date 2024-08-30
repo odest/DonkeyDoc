@@ -109,7 +109,7 @@ class HomeInterface(QWidget):
             )
             return
 
-        view_area = ViewArea(path, doc)
+        view_area = ViewArea(doc)
         self.add_sub_interface(view_area, file_name, file_name)
 
         self.show_drop_card = False
