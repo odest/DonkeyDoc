@@ -89,7 +89,7 @@ class HomeInterface(QWidget):
 
     def add_file(self, path):
         """add file"""
-        state, tooltip_type, title, content = validate_file(path)
+        state, tooltip_type, title, content = validate_file(self, path)
         self.show_tooltip(tooltip_type, title, content)
 
         if not state:
