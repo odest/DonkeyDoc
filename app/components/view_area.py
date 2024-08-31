@@ -11,6 +11,7 @@ from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme
 
 from ..components.custom_message_box import InfoDialogBox
 from ..components.tool_bar import ToolBar
+from ..components.toc_view import TocView
 
 
 class ViewArea(CardWidget):
@@ -27,6 +28,7 @@ class ViewArea(CardWidget):
         self.current_page = 1
         self.page_rotation = 0
         self.is_fit_page = False
+        self.show_toc_view = False
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignCenter)
@@ -47,6 +49,9 @@ class ViewArea(CardWidget):
         self.tool_bar.page_count_line_edit.setText(str(self.current_page))
         self.tool_bar.page_count_label.setText(
             f"/ {self.page_count}",
+        )
+        self.tool_bar.content_button.clicked.connect(
+            self.change_toc_view_visibility
         )
         self.tool_bar.theme_button.clicked.connect(lambda: toggleTheme(True))
         self.tool_bar.info_button.clicked.connect(self.show_info)
@@ -72,6 +77,14 @@ class ViewArea(CardWidget):
         )
 
         self.vertical_scroll_widget = QWidget()
+
+        self.toc_view = TocView(self.document, self)
+        self.toc_view.close_button.clicked.connect(
+            self.change_toc_view_visibility
+        )
+        self.toc_view.setVisible(self.show_toc_view)
+        self.toc_view.setFixedSize(300, 500)
+        self.toc_view.move(10, 70)
 
     def init_layout(self):
         """initialize layout"""
@@ -227,3 +240,14 @@ class ViewArea(CardWidget):
         """show info"""
         dialog = InfoDialogBox(self.path, self.document, self)
         dialog.exec()
+
+    def change_toc_view_visibility(self):
+        """change toc visibility"""
+        if self.show_toc_view:
+            self.toc_view.setVisible(False)
+            self.show_toc_view = False
+            self.tool_bar.content_button.setChecked(False)
+        else:
+            self.toc_view.setVisible(True)
+            self.show_toc_view = True
+            self.tool_bar.content_button.setChecked(True)
