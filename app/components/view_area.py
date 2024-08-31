@@ -8,15 +8,18 @@ from pymupdf.utils import get_pixmap
 from pymupdf import Identity
 
 from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme
+
+from ..components.custom_message_box import InfoDialogBox
 from ..components.tool_bar import ToolBar
 
 
 class ViewArea(CardWidget):
     """ViewArea"""
 
-    def __init__(self, doc, parent=None):
+    def __init__(self, path, doc, parent=None):
         super().__init__(parent)
 
+        self.path = path
         self.document = doc
         self.page_count = doc.page_count
         self.page_widget_list = []
@@ -43,6 +46,7 @@ class ViewArea(CardWidget):
             f"/ {self.page_count}",
         )
         self.tool_bar.theme_button.clicked.connect(lambda: toggleTheme(True))
+        self.tool_bar.info_button.clicked.connect(self.show_info)
         self.tool_bar.prev_page.clicked.connect(self.prev_page)
         self.tool_bar.next_page.clicked.connect(self.next_page)
         self.tool_bar.page_count_line_edit.returnPressed.connect(
@@ -161,3 +165,7 @@ class ViewArea(CardWidget):
 
         except ValueError:
             self.tool_bar.page_count_line_edit.setText(str(self.current_page))
+
+    def show_info(self):
+        dialog = InfoDialogBox(self.path, self.document, self)
+        dialog.exec()
