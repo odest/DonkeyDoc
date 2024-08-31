@@ -7,6 +7,7 @@ from lib import (
     CardWidget,
     FluentIcon,
     StrongBodyLabel,
+    VerticalSeparator,
     TransparentToolButton,
     TransparentToggleToolButton,
 )
@@ -26,9 +27,16 @@ class ToolBar(CardWidget):
             FluentIcon.ALIGNMENT, self
         )
         self.main_layout.addWidget(self.content_button)
-
         self.theme_button = TransparentToolButton(FluentIcon.CONSTRACT, self)
         self.main_layout.addWidget(self.theme_button)
+
+        sep = VerticalSeparator(self)
+        self.main_layout.addWidget(sep)
+
+        self.zoom_in = TransparentToolButton(FluentIcon.ZOOM_IN, self)
+        self.main_layout.addWidget(self.zoom_in)
+        self.zoom_out = TransparentToolButton(FluentIcon.ZOOM_OUT, self)
+        self.main_layout.addWidget(self.zoom_out)
         self.main_layout.addStretch()
 
         self.prev_page = TransparentToolButton(FluentIcon.PAGE_LEFT, self)
@@ -43,6 +51,14 @@ class ToolBar(CardWidget):
         self.next_page = TransparentToolButton(FluentIcon.PAGE_RIGHT, self)
         self.main_layout.addWidget(self.next_page)
         self.main_layout.addStretch()
+
+        self.fit_page = TransparentToggleToolButton(FluentIcon.FIT_PAGE, self)
+        self.main_layout.addWidget(self.fit_page)
+        self.rotate_page = TransparentToolButton(FluentIcon.ROTATE, self)
+        self.main_layout.addWidget(self.rotate_page)
+
+        sep = VerticalSeparator(self)
+        self.main_layout.addWidget(sep)
 
         self.info_button = TransparentToolButton(FluentIcon.INFO, self)
         self.main_layout.addWidget(self.info_button)

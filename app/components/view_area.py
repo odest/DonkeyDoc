@@ -1,7 +1,7 @@
 # coding:utf-8
 
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QImage, QPixmap, QColor
+from PyQt5.QtGui import QImage, QPixmap, QColor, QTransform
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QGraphicsDropShadowEffect
 
 from pymupdf.utils import get_pixmap
@@ -23,7 +23,10 @@ class ViewArea(CardWidget):
         self.document = doc
         self.page_count = doc.page_count
         self.page_widget_list = []
+        self.page_pixmap_dict = {}
         self.current_page = 1
+        self.page_rotation = 0
+        self.is_fit_page = False
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignCenter)
@@ -52,6 +55,10 @@ class ViewArea(CardWidget):
         self.tool_bar.page_count_line_edit.returnPressed.connect(
             self.go_to_page
         )
+        self.tool_bar.zoom_in.clicked.connect(lambda: self.zoom_page(50))
+        self.tool_bar.zoom_out.clicked.connect(lambda: self.zoom_page(-50))
+        self.tool_bar.fit_page.clicked.connect(self.fit_page)
+        self.tool_bar.rotate_page.clicked.connect(self.rotate_page)
         self.main_layout.addWidget(self.tool_bar)
 
         self.vertical_scroll_area = ScrollArea(self)
@@ -97,6 +104,7 @@ class ViewArea(CardWidget):
             page_widget.setPixmap(pixmap)
             self.vertical_page_layout.addWidget(page_widget)
             self.page_widget_list.append(page_widget)
+            self.page_pixmap_dict[page_widget] = pixmap
 
             _shadow = QGraphicsDropShadowEffect()
             _shadow.setBlurRadius(15)
@@ -143,6 +151,55 @@ class ViewArea(CardWidget):
             self.tool_bar.page_count_line_edit.setText(str(self.current_page))
             self.go_to_page()
 
+    def zoom_page(self, value):
+        """zoom page"""
+        for page in self.page_widget_list:
+            page_width = page.width()
+            page_height = page.height()
+            aspect_ratio = page_height / page_width
+            new_height = page_height + value
+            new_width = int(new_height / aspect_ratio)
+            page.setFixedSize(new_width, new_height)
+
+    def fit_page(self):
+        """fit page"""
+        if self.is_fit_page:
+            self.is_fit_page = False
+            scroll_area_height = self.vertical_scroll_area.height()
+            for page in self.page_widget_list:
+                page_width = page.width()
+                page_height = page.height()
+                aspect_ratio = page_width / page_height
+                new_height = scroll_area_height
+                new_width = int(new_height * aspect_ratio)
+                page.setFixedSize(new_width, new_height)
+        else:
+            self.is_fit_page = True
+            scroll_area_width = self.vertical_scroll_area.width()
+            for page in self.page_widget_list:
+                page_width = page.width()
+                page_height = page.height()
+                aspect_ratio = page_height / page_width
+                new_width = scroll_area_width - 20
+                new_height = int(new_width * aspect_ratio)
+                page.setFixedSize(new_width, new_height)
+
+    def rotate_page(self):
+        """rotate page"""
+        if self.page_rotation != 270:
+            self.page_rotation += 90
+        else:
+            self.page_rotation = 0
+
+        matrix = QTransform()
+        matrix.rotate(self.page_rotation)
+
+        for page in self.page_widget_list:
+            rotated_pixmap = self.page_pixmap_dict[page].transformed(
+                matrix, Qt.TransformationMode.SmoothTransformation
+            )
+            page.setPixmap(rotated_pixmap)
+
     def go_to_page(self):
         """go to page"""
         try:
@@ -167,5 +224,6 @@ class ViewArea(CardWidget):
             self.tool_bar.page_count_line_edit.setText(str(self.current_page))
 
     def show_info(self):
+        """show info"""
         dialog = InfoDialogBox(self.path, self.document, self)
         dialog.exec()
