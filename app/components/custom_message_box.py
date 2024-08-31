@@ -1,8 +1,5 @@
 # coding:utf-8
 
-import os
-from typing import Any, Dict
-
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout
 
@@ -16,6 +13,8 @@ from lib import (
     HorizontalSeparator,
     TransparentToolButton,
 )
+
+from ..utils.file_utils import get_information
 
 
 class PasswordMessageBox(MessageBoxBase):
@@ -90,7 +89,7 @@ class InfoDialogBox(MessageBoxBase):
         self.close_button = TransparentToolButton(FluentIcon.CLOSE, self)
         self.close_button.clicked.connect(self.on_close_button_clicked)
 
-        for key, value in self.get_information().items():
+        for key, value in get_information(self.path, self.document).items():
             label_1 = StrongBodyLabel(f"{key}:", self)
             self.key_layout.addWidget(label_1)
             label_2 = CaptionLabel(str(value), self)
@@ -114,27 +113,6 @@ class InfoDialogBox(MessageBoxBase):
         self.content_layout.addStretch()
         self.content_layout.addLayout(self.value_layout)
         self.viewLayout.addLayout(self.content_layout)
-
-    def get_information(self) -> Dict[str, Any]:
-        """get information"""
-        metadata = self.document.metadata
-        information = {
-            "File Name": os.path.basename(self.path),
-            "File Path": self.path,
-            "File Format": metadata["format"],
-            "File Size": os.path.getsize(self.path),
-            "Page Count": self.document.page_count,
-            "Title": metadata["title"],
-            "Author": metadata["author"],
-            "Creator": metadata["creator"],
-            "Producer": metadata["producer"],
-            "Subject": metadata["subject"],
-            "Keywords": metadata["keywords"],
-            "Encryption": metadata["encryption"],
-            "Creation Date": metadata["creationDate"],
-            "Modification Date": metadata["modDate"],
-        }
-        return information
 
     def on_close_button_clicked(self):
         """on close button clicked"""
