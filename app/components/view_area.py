@@ -82,6 +82,7 @@ class ViewArea(CardWidget):
         self.toc_view.close_button.clicked.connect(
             self.change_toc_view_visibility
         )
+        self.toc_view.content_clicked.connect(self.go_to_page)
         self.toc_view.setVisible(self.show_toc_view)
         self.toc_view.setFixedSize(300, 500)
         self.toc_view.move(10, 70)
@@ -213,12 +214,13 @@ class ViewArea(CardWidget):
             )
             page.setPixmap(rotated_pixmap)
 
-    def go_to_page(self):
+    def go_to_page(self, page_count=None):
         """go to page"""
         try:
-            count = int(self.tool_bar.page_count_line_edit.text())
+            if not page_count:
+                page_count = int(self.tool_bar.page_count_line_edit.text())
 
-            if count > self.page_count or count <= 0:
+            if page_count > self.page_count or page_count <= 0:
                 self.tool_bar.page_count_line_edit.setText(
                     str(self.current_page)
                 )
@@ -228,7 +230,7 @@ class ViewArea(CardWidget):
                 space = self.vertical_page_layout.spacing()
 
                 total_height = 10
-                for i in range(count - 1):
+                for i in range(page_count - 1):
                     total_height += self.page_widget_list[i].height()
                     total_height += space
                 scroll_bar.setValue(total_height)
