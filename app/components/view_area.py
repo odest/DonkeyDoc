@@ -24,6 +24,7 @@ class ViewArea(CardWidget):
         self.document = doc
         self.page_count = doc.page_count
         self.page_widget_list = []
+        self.page_pixmap_list = []
         self.page_pixmap_dict = {}
         self.current_page = 1
         self.page_rotation = 0
@@ -64,7 +65,6 @@ class ViewArea(CardWidget):
         self.tool_bar.zoom_out.clicked.connect(lambda: self.zoom_page(-50))
         self.tool_bar.fit_page.clicked.connect(self.fit_page)
         self.tool_bar.rotate_page.clicked.connect(self.rotate_page)
-        self.main_layout.addWidget(self.tool_bar)
 
         self.vertical_scroll_area = ScrollArea(self)
         self.vertical_scroll_area.setStyleSheet(
@@ -84,12 +84,11 @@ class ViewArea(CardWidget):
         )
         self.toc_view.content_clicked.connect(self.go_to_page)
         self.toc_view.setVisible(self.show_toc_view)
-        self.toc_view.setFixedSize(300, 500)
-        self.toc_view.move(10, 70)
+        self.toc_view.move(10, 74)
 
     def init_layout(self):
         """initialize layout"""
-
+        self.main_layout.addWidget(self.tool_bar)
         self.vertical_scroll_widget.setLayout(self.vertical_page_layout)
         self.main_layout.addWidget(self.vertical_scroll_widget)
         self.vertical_scroll_area.setWidget(self.vertical_scroll_widget)
@@ -118,6 +117,7 @@ class ViewArea(CardWidget):
             page_widget.setPixmap(pixmap)
             self.vertical_page_layout.addWidget(page_widget)
             self.page_widget_list.append(page_widget)
+            self.page_pixmap_list.append(pixmap)
             self.page_pixmap_dict[page_widget] = pixmap
 
             _shadow = QGraphicsDropShadowEffect()
@@ -127,6 +127,8 @@ class ViewArea(CardWidget):
             page_widget.setGraphicsEffect(_shadow)
 
             del page_pixmap
+
+        self.toc_view.init_sub_interface(self.page_pixmap_list)
 
     def scroll_page(self):
         """scroll page"""
@@ -150,6 +152,22 @@ class ViewArea(CardWidget):
 
         if self.current_page:
             self.tool_bar.page_count_line_edit.setText(str(self.current_page))
+            self.toc_view.toc_image.set_current_page_card(self.current_page)
+            scroll_bar = (
+                self.toc_view.toc_image.scroll_area.verticalScrollBar()
+            )
+            space = self.toc_view.toc_image.page_layout.spacing()
+            total_height = int(
+                -(self.toc_view.toc_image.scroll_area.height() / 3)
+                + self.toc_view.toc_image.page_card_dict[1].height() / 3
+            )
+
+            for i in range(self.current_page - 1):
+                total_height += self.toc_view.toc_image.page_card_dict[
+                    i + 1
+                ].height()
+                total_height += space
+            scroll_bar.setValue(total_height)
 
     def prev_page(self):
         """prev page"""
@@ -253,3 +271,19 @@ class ViewArea(CardWidget):
             self.toc_view.setVisible(True)
             self.show_toc_view = True
             self.tool_bar.content_button.setChecked(True)
+
+    def resizeEvent(self, event):
+        """Handle the resize event"""
+        super().resizeEvent(event)
+
+        distance = (
+            self.main_layout.getContentsMargins()[1]
+            + self.main_layout.getContentsMargins()[3]
+            + self.main_layout.spacing()
+            + self.tool_bar.height()
+        )
+        if not distance:
+            distance = 85
+        self.toc_view.setFixedSize(
+            self.toc_view.width(), int(self.height() - distance)
+        )
