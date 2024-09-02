@@ -12,6 +12,7 @@ from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme
 from ..components.custom_message_box import InfoDialogBox
 from ..components.tool_bar import ToolBar
 from ..components.toc_view import TocView
+from ..components.text_view import TextView
 
 
 class ViewArea(CardWidget):
@@ -30,6 +31,9 @@ class ViewArea(CardWidget):
         self.page_rotation = 0
         self.is_fit_page = False
         self.show_toc_view = False
+        self.show_text_view = False
+        self.text = ""
+        self.html = ""
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignCenter)
@@ -53,6 +57,9 @@ class ViewArea(CardWidget):
         )
         self.tool_bar.content_button.clicked.connect(
             self.change_toc_view_visibility
+        )
+        self.tool_bar.more_button.clicked.connect(
+            self.change_text_view_visibility
         )
         self.tool_bar.theme_button.clicked.connect(lambda: toggleTheme(True))
         self.tool_bar.info_button.clicked.connect(self.show_info)
@@ -86,6 +93,12 @@ class ViewArea(CardWidget):
         self.toc_view.setVisible(self.show_toc_view)
         self.toc_view.move(10, 74)
 
+        self.text_view = TextView(self)
+        self.text_view.close_button.clicked.connect(
+            self.change_text_view_visibility
+        )
+        self.text_view.setVisible(self.show_text_view)
+
     def init_layout(self):
         """initialize layout"""
         self.main_layout.addWidget(self.tool_bar)
@@ -98,6 +111,8 @@ class ViewArea(CardWidget):
         """render page"""
         for i in range(self.page_count):
             page = self.document.load_page(i)
+            self.text += page.get_text("text")
+            self.html += page.get_text("html")
             page_pixmap = get_pixmap(page, matrix=Identity, clip=True)
             if page_pixmap.alpha:
                 image_format = QImage.Format.Format_RGBA8888
@@ -129,6 +144,7 @@ class ViewArea(CardWidget):
             del page_pixmap
 
         self.toc_view.init_sub_interface(self.page_pixmap_list)
+        self.text_view.init_sub_interface(self.text, self.html)
 
     def scroll_page(self):
         """scroll page"""
@@ -262,7 +278,7 @@ class ViewArea(CardWidget):
         dialog.exec()
 
     def change_toc_view_visibility(self):
-        """change toc visibility"""
+        """change toc view visibility"""
         if self.show_toc_view:
             self.toc_view.setVisible(False)
             self.show_toc_view = False
@@ -271,6 +287,17 @@ class ViewArea(CardWidget):
             self.toc_view.setVisible(True)
             self.show_toc_view = True
             self.tool_bar.content_button.setChecked(True)
+
+    def change_text_view_visibility(self):
+        """change text view visibility"""
+        if self.show_text_view:
+            self.text_view.setVisible(False)
+            self.show_text_view = False
+            self.tool_bar.more_button.setChecked(False)
+        else:
+            self.text_view.setVisible(True)
+            self.show_text_view = True
+            self.tool_bar.more_button.setChecked(True)
 
     def resizeEvent(self, event):
         """Handle the resize event"""
@@ -286,4 +313,16 @@ class ViewArea(CardWidget):
             distance = 85
         self.toc_view.setFixedSize(
             self.toc_view.width(), int(self.height() - distance)
+        )
+
+        self.text_view.move(
+            int(
+                self.width()
+                - self.text_view.width()
+                - self.main_layout.getContentsMargins()[2]
+            ),
+            74,
+        )
+        self.text_view.setFixedSize(
+            self.text_view.width(), int(self.height() - distance)
         )
