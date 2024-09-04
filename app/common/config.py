@@ -37,6 +37,9 @@ class Config(QConfig):
     )
 
 
+USER_HOME = os.path.expanduser("~")
+APP_HOME = os.path.join(USER_HOME, ".DonkeyDoc")
+CONFIG_PATH = os.path.join(APP_HOME, "config", "config.json")
+
 cfg = Config()
-config_path = os.path.join("app", "config", "config.json")
-qconfig.load(config_path, cfg)
+qconfig.load(CONFIG_PATH, cfg)

@@ -44,7 +44,7 @@ class MainWindow(FluentWindow):
         """Initialize the main window properties and display the splash screen."""
         self.resize(970, 790)
         self.setMinimumWidth(760)
-        self.setWindowIcon(QIcon(os.path.join("docs", "logo.svg")))
+        self.setWindowIcon(QIcon(":/gallery/images/logo.png"))
         self.setWindowTitle("DonkeyDoc")
 
         self.setMicaEffectEnabled(cfg.get(cfg.micaEnabled))
