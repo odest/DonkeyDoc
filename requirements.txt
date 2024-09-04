@@ -1,0 +1,7 @@
+PyQt5>=5.15.0
+pymupdf
+darkdetect
+pywin32==306; sys_platform=="win32"
+xcffib==1.5.0; sys_platform=="linux"
+pyobjc; sys_platform=="darwin"
+PyCocoa; sys_platform=="darwin"
