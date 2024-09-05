@@ -2,8 +2,6 @@
 <img src="https://raw.githubusercontent.com/odest/DonkeyDoc/master/docs/logo.png" alt="logo" width="80" height="80"/>
 </p>
 
-<br>
-
 <div align="center">
 
 DonkeyDoc
@@ -17,6 +15,12 @@ DonkeyDoc
 [![license](https://img.shields.io/badge/License-GPLv3-blue?color=#4ec820)](https://github.com/odest/DonkeyDoc?tab=GPL-3.0-1-ov-file)
 [![Platform Win32 | Linux | macOS](https://img.shields.io/badge/Platform-Win32%20|%20Linux%20|%20macOS-blue?color=#4ec820)]()
 ---
+
+
+
+<div align="center">
+<a href="https://github.com/odest/DonkeyDoc/releases/latest"><img alt="Get it on GitHub" src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png" height="65"></a>
+</div>
 
 <br>
 
@@ -54,6 +58,7 @@ DonkeyDoc
     - [Installing the Package](#installing-the-package)
     - [Running the Program](#running-the-program)
   - [Story Behind the Project Name](#story-behind-the-project-name)
+  - [Stats](#stats)
   - [License](#license)
 
 <br>
@@ -227,6 +232,12 @@ The reason I chose this name is rooted in a childhood memory from the farm where
 When I was young, I had just finished my homework and left it unattended for a moment. When I came back, our donkey had eaten almost all of it. There was nothing I could do—the homework was gone, and I didn’t have time to redo it. When I went to school and my teacher asked about the homework, I explained that the donkey had eaten it. My teacher scolded me, saying she thought I was making excuses, and the whole class laughed at me. I still remember it vividly.
 
 When I was brainstorming names for this project, this memory suddenly came back to me. I thought there couldn’t be a better name than this one, as it carries a personal story, is memorable, and even adds a touch of humor. This is why I decided on **DonkeyDoc** for my project.
+
+<br>
+
+## Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/23ebdc54961ded1839f9180cd0d9e7950ecf9a53.svg "Repobeats analytics image")
 
 <br>
 
