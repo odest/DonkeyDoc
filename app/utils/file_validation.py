@@ -6,17 +6,7 @@ from typing import Optional, Tuple
 from PyQt5.QtWidgets import QWidget
 
 from ..components.custom_message_box import PasswordMessageBox
-
-SUPPORT_IMG_FORMAT = (".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".svg")
-SUPPORT_FORMAT = (
-    ".pdf",
-    ".epub",
-    ".txt",
-    ".mobi",
-    ".xps",
-    ".fb2",
-    ".cbz",
-) + SUPPORT_IMG_FORMAT
+from ..common.setting import SUPPORT_FORMAT
 
 
 class Doc(Document):

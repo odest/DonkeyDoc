@@ -1,5 +1,4 @@
 # coding:utf-8
-import os
 import sys
 
 from lib import (
@@ -10,6 +9,8 @@ from lib import (
     OptionsValidator,
     OptionsConfigItem,
 )
+
+from .setting import CONFIG_FILE
 
 
 def is_win_11():
@@ -36,10 +37,11 @@ class Config(QConfig):
         restart=True,
     )
 
+    # software update
+    checkUpdateAtStartUp = ConfigItem(
+        "Update", "CheckUpdateAtStartUp", True, BoolValidator()
+    )
 
-USER_HOME = os.path.expanduser("~")
-APP_HOME = os.path.join(USER_HOME, ".DonkeyDoc")
-CONFIG_PATH = os.path.join(APP_HOME, "config", "config.json")
 
 cfg = Config()
-qconfig.load(CONFIG_PATH, cfg)
+qconfig.load(CONFIG_FILE, cfg)

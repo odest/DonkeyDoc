@@ -100,6 +100,18 @@ class SettingInterface(ScrollArea):
             parent=self.personal_group,
         )
 
+        # update software
+        self.update_software_group = SettingCardGroup(
+            "Software update", self.scroll_widget
+        )
+        self.update_on_start_up_card = SwitchSettingCard(
+            FluentIcon.UPDATE,
+            "Check for updates when the application starts",
+            "The new version will be more stable and have more features",
+            configItem=cfg.checkUpdateAtStartUp,
+            parent=self.update_software_group,
+        )
+
     def init_layout(self):
         """initialize layout"""
         self.personal_group.addSettingCard(self.mica_card)
@@ -107,7 +119,10 @@ class SettingInterface(ScrollArea):
         self.personal_group.addSettingCard(self.theme_color_card)
         self.personal_group.addSettingCard(self.zoom_card)
 
+        self.update_software_group.addSettingCard(self.update_on_start_up_card)
+
         self.expand_layout.addWidget(self.personal_group)
+        self.expand_layout.addWidget(self.update_software_group)
 
     def show_restart_tooltip(self):
         """show restart tooltip"""
