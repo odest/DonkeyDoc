@@ -2,23 +2,10 @@
 
 from PyQt5.QtCore import Qt, QRect, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QColor, QTransform
-from PyQt5.QtWidgets import (
-    QVBoxLayout,
-    QWidget,
-    QGraphicsDropShadowEffect,
-    QApplication,
-)
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QGraphicsDropShadowEffect
 from pymupdf.utils import get_pixmap
 from pymupdf import Identity
-
-from lib import (
-    CardWidget,
-    ScrollArea,
-    PixmapLabel,
-    toggleTheme,
-    InfoBar,
-    InfoBarPosition,
-)
+from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme, InfoBar, InfoBarPosition
 
 from ..components.custom_message_box import InfoDialogBox
 from ..components.tool_bar import ToolBar
@@ -48,10 +35,9 @@ class ViewArea(CardWidget):
         self.text = ""
         self.html = ""
 
-        # Zoom settings
-        self.zoom_level = 100  # Default zoom level in percentage
-        self.MIN_ZOOM = 50     # Minimum zoom level
-        self.MAX_ZOOM = 200    # Maximum zoom level
+        self.zoom_level = 100
+        self.MIN_ZOOM = 50
+        self.MAX_ZOOM = 200
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignCenter)
@@ -65,7 +51,6 @@ class ViewArea(CardWidget):
         self.init_layout()
         self.render_page()
 
-        # Connect zoomChanged signal to update zoom buttons
         self.zoomChanged.connect(self.update_zoom_buttons)
 
     def init_widget(self):
@@ -156,7 +141,6 @@ class ViewArea(CardWidget):
             self.page_pixmap_list.append(pixmap)
             self.page_pixmap_dict[page_widget] = pixmap
 
-            # Apply initial zoom
             self.apply_zoom(page_widget)
 
             _shadow = QGraphicsDropShadowEffect()
@@ -170,7 +154,6 @@ class ViewArea(CardWidget):
         self.toc_view.init_sub_interface(self.page_pixmap_list)
         self.text_view.init_sub_interface(self.text, self.html)
 
-        # After rendering all pages, update zoom buttons
         self.update_zoom_buttons()
 
     def apply_zoom(self, page_widget):
@@ -199,7 +182,6 @@ class ViewArea(CardWidget):
             self.zoomChanged.emit(self.zoom_level)
             self.update_zoom()
         else:
-            # Zoom level hasn't changed; no action needed
             pass
 
     def update_zoom(self):
@@ -207,7 +189,6 @@ class ViewArea(CardWidget):
         for page_widget in self.page_widget_list:
             self.apply_zoom(page_widget)
 
-        # Update UI elements if necessary
         self.tool_bar.page_count_line_edit.setText(str(self.current_page))
 
     def update_zoom_buttons(self):
@@ -220,16 +201,14 @@ class ViewArea(CardWidget):
         """fit page"""
         if self.is_fit_page:
             self.is_fit_page = False
-            self.zoom_level = 100  # Reset to default zoom
+            self.zoom_level = 100
             self.update_zoom()
             self.tool_bar.fit_page.setChecked(False)
         else:
-            # Implement fit to width logic
             self.is_fit_page = True
             viewport_width = self.vertical_scroll_area.viewport().width()
-            # Assuming first page represents the size
             pixmap = self.page_pixmap_list[0]
-            new_zoom = (viewport_width - 40) / pixmap.width() * 100  # Subtracting margins
+            new_zoom = (viewport_width - 40) / pixmap.width() * 100
             self.zoom_level = int(new_zoom)
             if self.zoom_level > self.MAX_ZOOM:
                 self.zoom_level = self.MAX_ZOOM
@@ -253,7 +232,6 @@ class ViewArea(CardWidget):
             rotated_pixmap = original_pixmap.transformed(
                 matrix, Qt.SmoothTransformation
             )
-            # Apply zoom after rotation
             scaled_pixmap = rotated_pixmap.scaled(
                 int(rotated_pixmap.width() * self.zoom_level / 100),
                 int(rotated_pixmap.height() * self.zoom_level / 100),
