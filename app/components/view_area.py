@@ -1,13 +1,24 @@
 # coding:utf-8
 
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt, QRect, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QColor, QTransform
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QGraphicsDropShadowEffect
-
+from PyQt5.QtWidgets import (
+    QVBoxLayout,
+    QWidget,
+    QGraphicsDropShadowEffect,
+    QApplication,
+)
 from pymupdf.utils import get_pixmap
 from pymupdf import Identity
 
-from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme
+from lib import (
+    CardWidget,
+    ScrollArea,
+    PixmapLabel,
+    toggleTheme,
+    InfoBar,
+    InfoBarPosition,
+)
 
 from ..components.custom_message_box import InfoDialogBox
 from ..components.tool_bar import ToolBar
@@ -17,6 +28,8 @@ from ..components.text_view import TextView
 
 class ViewArea(CardWidget):
     """ViewArea"""
+
+    zoomChanged = pyqtSignal(int)
 
     def __init__(self, path, doc, parent=None):
         super().__init__(parent)
@@ -35,6 +48,11 @@ class ViewArea(CardWidget):
         self.text = ""
         self.html = ""
 
+        # Zoom settings
+        self.zoom_level = 100  # Default zoom level in percentage
+        self.MIN_ZOOM = 50     # Minimum zoom level
+        self.MAX_ZOOM = 200    # Maximum zoom level
+
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignCenter)
         self.main_layout.setContentsMargins(10, 10, 10, 10)
@@ -46,6 +64,9 @@ class ViewArea(CardWidget):
         self.init_widget()
         self.init_layout()
         self.render_page()
+
+        # Connect zoomChanged signal to update zoom buttons
+        self.zoomChanged.connect(self.update_zoom_buttons)
 
     def init_widget(self):
         """initialize widget"""
@@ -68,8 +89,8 @@ class ViewArea(CardWidget):
         self.tool_bar.page_count_line_edit.returnPressed.connect(
             self.go_to_page
         )
-        self.tool_bar.zoom_in.clicked.connect(lambda: self.zoom_page(50))
-        self.tool_bar.zoom_out.clicked.connect(lambda: self.zoom_page(-50))
+        self.tool_bar.zoom_in.clicked.connect(lambda: self.zoom_page(10))
+        self.tool_bar.zoom_out.clicked.connect(lambda: self.zoom_page(-10))
         self.tool_bar.fit_page.clicked.connect(self.fit_page)
         self.tool_bar.rotate_page.clicked.connect(self.rotate_page)
 
@@ -103,7 +124,6 @@ class ViewArea(CardWidget):
         """initialize layout"""
         self.main_layout.addWidget(self.tool_bar)
         self.vertical_scroll_widget.setLayout(self.vertical_page_layout)
-        self.main_layout.addWidget(self.vertical_scroll_widget)
         self.vertical_scroll_area.setWidget(self.vertical_scroll_widget)
         self.main_layout.addWidget(self.vertical_scroll_area)
 
@@ -129,11 +149,15 @@ class ViewArea(CardWidget):
             pixmap.convertFromImage(page_image)
 
             page_widget = PixmapLabel(self)
+            page_widget.setAlignment(Qt.AlignCenter)
             page_widget.setPixmap(pixmap)
             self.vertical_page_layout.addWidget(page_widget)
             self.page_widget_list.append(page_widget)
             self.page_pixmap_list.append(pixmap)
             self.page_pixmap_dict[page_widget] = pixmap
+
+            # Apply initial zoom
+            self.apply_zoom(page_widget)
 
             _shadow = QGraphicsDropShadowEffect()
             _shadow.setBlurRadius(15)
@@ -145,6 +169,98 @@ class ViewArea(CardWidget):
 
         self.toc_view.init_sub_interface(self.page_pixmap_list)
         self.text_view.init_sub_interface(self.text, self.html)
+
+        # After rendering all pages, update zoom buttons
+        self.update_zoom_buttons()
+
+    def apply_zoom(self, page_widget):
+        """Apply zoom to a single page widget based on the current zoom level."""
+        pixmap = self.page_pixmap_dict[page_widget]
+        scaled_pixmap = pixmap.scaled(
+            int(pixmap.width() * self.zoom_level / 100),
+            int(pixmap.height() * self.zoom_level / 100),
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation
+        )
+        page_widget.setPixmap(scaled_pixmap)
+
+    def zoom_page(self, value):
+        """Zoom page with limitations."""
+        new_zoom = self.zoom_level + value
+        if new_zoom < self.MIN_ZOOM:
+            new_zoom = self.MIN_ZOOM
+            self.show_tooltip("warning", "Minimum Zoom Reached", f"Cannot zoom out below {self.MIN_ZOOM}%.")
+        elif new_zoom > self.MAX_ZOOM:
+            new_zoom = self.MAX_ZOOM
+            self.show_tooltip("warning", "Maximum Zoom Reached", f"Cannot zoom in above {self.MAX_ZOOM}%.")
+        
+        if new_zoom != self.zoom_level:
+            self.zoom_level = new_zoom
+            self.zoomChanged.emit(self.zoom_level)
+            self.update_zoom()
+        else:
+            # Zoom level hasn't changed; no action needed
+            pass
+
+    def update_zoom(self):
+        """Update all pages with the current zoom level."""
+        for page_widget in self.page_widget_list:
+            self.apply_zoom(page_widget)
+
+        # Update UI elements if necessary
+        self.tool_bar.page_count_line_edit.setText(str(self.current_page))
+
+    def update_zoom_buttons(self):
+        """Update the state of zoom buttons based on the current zoom level."""
+        can_zoom_in = self.zoom_level < self.MAX_ZOOM
+        can_zoom_out = self.zoom_level > self.MIN_ZOOM
+        self.tool_bar.set_zoom_buttons_enabled(can_zoom_in, can_zoom_out)
+
+    def fit_page(self):
+        """fit page"""
+        if self.is_fit_page:
+            self.is_fit_page = False
+            self.zoom_level = 100  # Reset to default zoom
+            self.update_zoom()
+            self.tool_bar.fit_page.setChecked(False)
+        else:
+            # Implement fit to width logic
+            self.is_fit_page = True
+            viewport_width = self.vertical_scroll_area.viewport().width()
+            # Assuming first page represents the size
+            pixmap = self.page_pixmap_list[0]
+            new_zoom = (viewport_width - 40) / pixmap.width() * 100  # Subtracting margins
+            self.zoom_level = int(new_zoom)
+            if self.zoom_level > self.MAX_ZOOM:
+                self.zoom_level = self.MAX_ZOOM
+            elif self.zoom_level < self.MIN_ZOOM:
+                self.zoom_level = self.MIN_ZOOM
+            self.update_zoom()
+            self.tool_bar.fit_page.setChecked(True)
+
+    def rotate_page(self):
+        """rotate page"""
+        if self.page_rotation != 270:
+            self.page_rotation += 90
+        else:
+            self.page_rotation = 0
+
+        matrix = QTransform()
+        matrix.rotate(self.page_rotation)
+
+        for page in self.page_widget_list:
+            original_pixmap = self.page_pixmap_dict[page]
+            rotated_pixmap = original_pixmap.transformed(
+                matrix, Qt.SmoothTransformation
+            )
+            # Apply zoom after rotation
+            scaled_pixmap = rotated_pixmap.scaled(
+                int(rotated_pixmap.width() * self.zoom_level / 100),
+                int(rotated_pixmap.height() * self.zoom_level / 100),
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation
+            )
+            page.setPixmap(scaled_pixmap)
 
     def scroll_page(self):
         """scroll page"""
@@ -199,55 +315,6 @@ class ViewArea(CardWidget):
             self.tool_bar.page_count_line_edit.setText(str(self.current_page))
             self.go_to_page()
 
-    def zoom_page(self, value):
-        """zoom page"""
-        for page in self.page_widget_list:
-            page_width = page.width()
-            page_height = page.height()
-            aspect_ratio = page_height / page_width
-            new_height = page_height + value
-            new_width = int(new_height / aspect_ratio)
-            page.setFixedSize(new_width, new_height)
-
-    def fit_page(self):
-        """fit page"""
-        if self.is_fit_page:
-            self.is_fit_page = False
-            scroll_area_height = self.vertical_scroll_area.height()
-            for page in self.page_widget_list:
-                page_width = page.width()
-                page_height = page.height()
-                aspect_ratio = page_width / page_height
-                new_height = scroll_area_height
-                new_width = int(new_height * aspect_ratio)
-                page.setFixedSize(new_width, new_height)
-        else:
-            self.is_fit_page = True
-            scroll_area_width = self.vertical_scroll_area.width()
-            for page in self.page_widget_list:
-                page_width = page.width()
-                page_height = page.height()
-                aspect_ratio = page_height / page_width
-                new_width = scroll_area_width - 20
-                new_height = int(new_width * aspect_ratio)
-                page.setFixedSize(new_width, new_height)
-
-    def rotate_page(self):
-        """rotate page"""
-        if self.page_rotation != 270:
-            self.page_rotation += 90
-        else:
-            self.page_rotation = 0
-
-        matrix = QTransform()
-        matrix.rotate(self.page_rotation)
-
-        for page in self.page_widget_list:
-            rotated_pixmap = self.page_pixmap_dict[page].transformed(
-                matrix, Qt.TransformationMode.SmoothTransformation
-            )
-            page.setPixmap(rotated_pixmap)
-
     def go_to_page(self, page_count=None):
         """go to page"""
         try:
@@ -268,6 +335,7 @@ class ViewArea(CardWidget):
                     total_height += self.page_widget_list[i].height()
                     total_height += space
                 scroll_bar.setValue(total_height)
+                self.current_page = page_count
 
         except ValueError:
             self.tool_bar.page_count_line_edit.setText(str(self.current_page))
@@ -326,3 +394,36 @@ class ViewArea(CardWidget):
         self.text_view.setFixedSize(
             self.text_view.width(), int(self.height() - distance)
         )
+
+    def show_tooltip(self, tooltip_type: str, title: str, content: str):
+        """Show tooltip"""
+        if tooltip_type == "success":
+            InfoBar.success(
+                title=title,
+                content=content,
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=1500,
+                parent=self,
+            )
+        elif tooltip_type == "warning":
+            InfoBar.warning(
+                title=title,
+                content=content,
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP_RIGHT,
+                duration=1500,
+                parent=self,
+            )
+        elif tooltip_type == "error":
+            InfoBar.error(
+                title=title,
+                content=content,
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP_RIGHT,
+                duration=1500,
+                parent=self,
+            )
