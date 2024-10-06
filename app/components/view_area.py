@@ -3,8 +3,10 @@
 from PyQt5.QtCore import Qt, QRect, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QColor, QTransform
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QGraphicsDropShadowEffect
+
 from pymupdf.utils import get_pixmap
 from pymupdf import Identity
+
 from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme, InfoBar, InfoBarPosition
 
 from ..components.custom_message_box import InfoDialogBox
