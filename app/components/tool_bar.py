@@ -64,3 +64,8 @@ class ToolBar(CardWidget):
         self.main_layout.addWidget(self.info_button)
         self.more_button = TransparentToggleToolButton(FluentIcon.FONT, self)
         self.main_layout.addWidget(self.more_button)
+
+    def set_zoom_buttons_enabled(self, can_zoom_in: bool, can_zoom_out: bool):
+        """Enable or disable zoom buttons based on zoom level."""
+        self.zoom_in.setEnabled(can_zoom_in)
+        self.zoom_out.setEnabled(can_zoom_out)
