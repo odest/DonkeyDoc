@@ -4,21 +4,28 @@ from PyQt5.QtCore import Qt, QRect, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QColor, QTransform
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QGraphicsDropShadowEffect
 
-from pymupdf.utils import get_pixmap
 from pymupdf import Identity
+from pymupdf.utils import get_pixmap
 
-from lib import CardWidget, ScrollArea, PixmapLabel, toggleTheme, InfoBar, InfoBarPosition
+from lib import (
+    InfoBar,
+    CardWidget,
+    ScrollArea,
+    PixmapLabel,
+    toggleTheme,
+    InfoBarPosition,
+)
 
-from ..components.custom_message_box import InfoDialogBox
 from ..components.tool_bar import ToolBar
 from ..components.toc_view import TocView
 from ..components.text_view import TextView
+from ..components.custom_message_box import InfoDialogBox
 
 
 class ViewArea(CardWidget):
     """ViewArea"""
 
-    zoomChanged = pyqtSignal(int)
+    zoom_changed = pyqtSignal(int)
 
     def __init__(self, path, doc, parent=None):
         super().__init__(parent)
@@ -53,29 +60,22 @@ class ViewArea(CardWidget):
         self.init_layout()
         self.render_page()
 
-        self.zoomChanged.connect(self.update_zoom_buttons)
+        self.zoom_changed.connect(self.update_zoom_buttons)
 
     def init_widget(self):
         """initialize widget"""
-
         self.tool_bar = ToolBar()
         self.tool_bar.page_count_line_edit.setText(str(self.current_page))
         self.tool_bar.page_count_label.setText(
             f"/ {self.page_count}",
         )
-        self.tool_bar.content_button.clicked.connect(
-            self.change_toc_view_visibility
-        )
-        self.tool_bar.more_button.clicked.connect(
-            self.change_text_view_visibility
-        )
+        self.tool_bar.content_button.clicked.connect(self.change_toc_view_visibility)
+        self.tool_bar.more_button.clicked.connect(self.change_text_view_visibility)
         self.tool_bar.theme_button.clicked.connect(lambda: toggleTheme(True))
         self.tool_bar.info_button.clicked.connect(self.show_info)
         self.tool_bar.prev_page.clicked.connect(self.prev_page)
         self.tool_bar.next_page.clicked.connect(self.next_page)
-        self.tool_bar.page_count_line_edit.returnPressed.connect(
-            self.go_to_page
-        )
+        self.tool_bar.page_count_line_edit.returnPressed.connect(self.go_to_page)
         self.tool_bar.zoom_in.clicked.connect(lambda: self.zoom_page(10))
         self.tool_bar.zoom_out.clicked.connect(lambda: self.zoom_page(-10))
         self.tool_bar.fit_page.clicked.connect(self.fit_page)
@@ -94,17 +94,13 @@ class ViewArea(CardWidget):
         self.vertical_scroll_widget = QWidget()
 
         self.toc_view = TocView(self.document, self)
-        self.toc_view.close_button.clicked.connect(
-            self.change_toc_view_visibility
-        )
+        self.toc_view.close_button.clicked.connect(self.change_toc_view_visibility)
         self.toc_view.content_clicked.connect(self.go_to_page)
         self.toc_view.setVisible(self.show_toc_view)
         self.toc_view.move(10, 74)
 
         self.text_view = TextView(self)
-        self.text_view.close_button.clicked.connect(
-            self.change_text_view_visibility
-        )
+        self.text_view.close_button.clicked.connect(self.change_text_view_visibility)
         self.text_view.setVisible(self.show_text_view)
 
     def init_layout(self):
@@ -161,27 +157,41 @@ class ViewArea(CardWidget):
     def apply_zoom(self, page_widget):
         """Apply zoom to a single page widget based on the current zoom level."""
         pixmap = self.page_pixmap_dict[page_widget]
+        matrix = QTransform()
+        matrix.rotate(self.page_rotation)
+
         scaled_pixmap = pixmap.scaled(
             int(pixmap.width() * self.zoom_level / 100),
             int(pixmap.height() * self.zoom_level / 100),
             Qt.KeepAspectRatio,
-            Qt.SmoothTransformation
+            Qt.SmoothTransformation,
         )
-        page_widget.setPixmap(scaled_pixmap)
+        rotated_pixmap = scaled_pixmap.transformed(
+            matrix, Qt.TransformationMode.SmoothTransformation
+        )
+        page_widget.setPixmap(rotated_pixmap)
 
     def zoom_page(self, value):
         """Zoom page with limitations."""
         new_zoom = self.zoom_level + value
         if new_zoom < self.MIN_ZOOM:
             new_zoom = self.MIN_ZOOM
-            self.show_tooltip("warning", "Minimum Zoom Reached", f"Cannot zoom out below {self.MIN_ZOOM}%.")
+            self.show_tooltip(
+                "warning",
+                "Minimum Zoom Reached",
+                f"Cannot zoom out below {self.MIN_ZOOM}%.",
+            )
         elif new_zoom > self.MAX_ZOOM:
             new_zoom = self.MAX_ZOOM
-            self.show_tooltip("warning", "Maximum Zoom Reached", f"Cannot zoom in above {self.MAX_ZOOM}%.")
-        
+            self.show_tooltip(
+                "warning",
+                "Maximum Zoom Reached",
+                f"Cannot zoom in above {self.MAX_ZOOM}%.",
+            )
+
         if new_zoom != self.zoom_level:
             self.zoom_level = new_zoom
-            self.zoomChanged.emit(self.zoom_level)
+            self.zoom_changed.emit(self.zoom_level)
             self.update_zoom()
         else:
             pass
@@ -238,7 +248,7 @@ class ViewArea(CardWidget):
                 int(rotated_pixmap.width() * self.zoom_level / 100),
                 int(rotated_pixmap.height() * self.zoom_level / 100),
                 Qt.KeepAspectRatio,
-                Qt.SmoothTransformation
+                Qt.SmoothTransformation,
             )
             page.setPixmap(scaled_pixmap)
 
@@ -251,12 +261,8 @@ class ViewArea(CardWidget):
             page_rect = self.vertical_scroll_area.viewport().mapFromGlobal(
                 page.mapToGlobal(page.rect().topLeft())
             )
-            page_visible_rect = QRect(page_rect, page.size()).intersected(
-                viewport_rect
-            )
-            visible_area = (
-                page_visible_rect.width() * page_visible_rect.height()
-            )
+            page_visible_rect = QRect(page_rect, page.size()).intersected(viewport_rect)
+            visible_area = page_visible_rect.width() * page_visible_rect.height()
 
             if visible_area > max_visible_area:
                 max_visible_area = visible_area
@@ -265,9 +271,7 @@ class ViewArea(CardWidget):
         if self.current_page:
             self.tool_bar.page_count_line_edit.setText(str(self.current_page))
             self.toc_view.toc_image.set_current_page_card(self.current_page)
-            scroll_bar = (
-                self.toc_view.toc_image.scroll_area.verticalScrollBar()
-            )
+            scroll_bar = self.toc_view.toc_image.scroll_area.verticalScrollBar()
             space = self.toc_view.toc_image.page_layout.spacing()
             total_height = int(
                 -(self.toc_view.toc_image.scroll_area.height() / 3)
@@ -275,9 +279,7 @@ class ViewArea(CardWidget):
             )
 
             for i in range(self.current_page - 1):
-                total_height += self.toc_view.toc_image.page_card_dict[
-                    i + 1
-                ].height()
+                total_height += self.toc_view.toc_image.page_card_dict[i + 1].height()
                 total_height += space
             scroll_bar.setValue(total_height)
 
@@ -302,9 +304,7 @@ class ViewArea(CardWidget):
                 page_count = int(self.tool_bar.page_count_line_edit.text())
 
             if page_count > self.page_count or page_count <= 0:
-                self.tool_bar.page_count_line_edit.setText(
-                    str(self.current_page)
-                )
+                self.tool_bar.page_count_line_edit.setText(str(self.current_page))
 
             else:
                 scroll_bar = self.vertical_scroll_area.verticalScrollBar()
@@ -359,9 +359,7 @@ class ViewArea(CardWidget):
         )
         if not distance:
             distance = 85
-        self.toc_view.setFixedSize(
-            self.toc_view.width(), int(self.height() - distance)
-        )
+        self.toc_view.setFixedSize(self.toc_view.width(), int(self.height() - distance))
 
         self.text_view.move(
             int(
