@@ -1,8 +1,8 @@
 [package]
 name = "donkeydoc"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "0.0.1"
+description = "A lightweight document viewer"
+authors = ["odest"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
