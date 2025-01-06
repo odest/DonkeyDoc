@@ -1,57 +1,40 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { useDropzone } from "react-dropzone";
+import { useNavigate } from "react-router-dom";
 
-const DropZone = () => {
-  const [fileNames, setFileNames] = useState([]);
+const DropZone = ({ setFileUrl }) => {
+  const navigate = useNavigate();
 
-  const onDrop = useCallback((acceptedFiles) => {
-    setFileNames(acceptedFiles.map(file => file.name));
-    console.log("Uploaded Files:", acceptedFiles);
-  }, []);
+  const onDrop = (acceptedFiles) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      const url = URL.createObjectURL(file);
+      setFileUrl(url);
+      navigate("/viewer");
+    }
+  };
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    accept: "application/pdf",
     noClick: true,
     noKeyboard: true,
   });
-
-  const handlePaste = () => {
-    navigator.clipboard.readText().then((text) => {
-      console.log("Pasted Data:", text);
-      setFileNames([text]);
-    });
-  };
 
   return (
     <div {...getRootProps({ className: "dropzone" })}>
       <input {...getInputProps()} />
       {isDragActive ? (
-        <p>Drop the file(s) here</p>
+        <p>Drop the file here...</p>
       ) : (
         <>
           <p>
-            <b>Drag & Drop File(s) Here</b>
+            <b>Drag & Drop a PDF File Here</b>
           </p>
           <p>or</p>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={open}>Select File(s)</button>
-            <button onClick={handlePaste}>Paste File(s)</button>
-          </div>
+          <button onClick={open}>Select a PDF File</button>
         </>
       )}
-
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
-        <h4>Uploaded Files:</h4>
-        {fileNames.length > 0 ? (
-          <ul>
-            {fileNames.map((fileName, index) => (
-              <li key={index}>{fileName}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No file selected or pasted yet.</p>
-        )}
-      </div>
     </div>
   );
 };

@@ -1,0 +1,89 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  color: #0abcf9;
+  height: 100vh;
+  display: flex;
+  background-image: url('../assets/bloom.png');
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  justify-content: center;
+  align-items: center;
+}
+
+.viewer-container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  gap: 20px;
+}
+
+.text p {
+  margin: 10px 0;
+  font-size: 20px;
+}
+
+.dropzone {
+  border: 2px dashed #0abcf9;
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  color: #0abcf9;
+  width: calc(100vw - 64px);
+  height: calc(100vh - 64px);
+  margin: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+button {
+  background-color: #0abcf9;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.4s;
+  font-size: 16px;
+  margin: 5px;
+}
+
+button:hover {
+  box-shadow: 7px 5px 56px -14px #0abcf9;
+}
+
+button:active {
+  transform: scale(0.97);
+  box-shadow: 7px 5px 56px -10px #0abcf9;
+}
+
+.dropzone p {
+  margin: 10px 0;
+  font-size: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: rgba(254, 254, 254, 0.25);
+    background-color: rgb(41, 41, 41);
+  }
+}
